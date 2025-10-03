@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Black Friday Spin Wheel</title>
+    <style>
+    .ir-wrap{font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#0f172a;background:#fff;border:1px
+    solid #e5e7eb;border-radius:16px;box-shadow:0 6px 20px rgba(2,6,23,.06);padding:18px;max-width:640px;margin:16px
+    auto;text-align:center}
+    .ir-title{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:8px}
+    .ir-title h2{margin:0;font-size:22px;font-weight:800;color:#111827}
+    .ir-title h3{margin:2px 0 0;font-size:16px;font-weight:600;color:#374151}
+    .ir-pointer{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px
+    solid #ef4444;margin:0 auto;position:relative;bottom:-25px;z-index:10}
+    .ir-wheel{width:260px;height:260px;border-radius:50%;border:10px solid #f1f5f9;margin:10px
+    auto;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px #e2e8f0;transform:rotate(0deg)}
+    .ir-labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+    .ir-label{position:absolute;left:50%;top:50%;transform-origin:50% 50%;text-align:center;font-weight:800;color:#334155;font-size:12px;line-height:1.2}
+    .ir-label span{display:inline-block;background:rgba(255,255,255,.9);padding:1px 5px;border-radius:10px;white-space:nowrap}
+    .ir-actions{display:flex;gap:10px;justify-content:center;margin-top:10px}
+    .ir-btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .ir-btn.primary{background:#3b82f6;color:#fff}
+    .ir-btn.ghost{background:#f1f5f9}
+    .ir-res{margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px}
+    .ir-picked{display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px
+    10px;font-weight:700;margin-bottom:8px}
+    .ir-cta{display:inline-block;margin-top:6px;background:#0ea5e9;color:#fff;border-radius:10px;padding:10px
+    14px;font-weight:800;text-decoration:none}
+    .ir-foot{margin-top:6px;color:#64748b;font-size:12px}
+    /* Pulse animation */
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+    .pulsing{animation:pulse 1.2s infinite;will-change:transform;transform:translateZ(0)}
+    </style>
+  </head>
+  <body>
+<section id="intent-roulette" class="ir-wrap" aria-label="Discount Spin Wheel">
+  <div class="ir-title">
+    <h2>Black Friday Spin Wheel</h2>
+    <h3>Spin and unlock amazing discounts!</h3>
+  </div>
+  
+  <!-- Pointer -->
+  <div class="ir-pointer"></div>
+  
+  <!-- Wheel -->
+  <div class="ir-wheel" id="ir-wheel">
+    <div class="ir-labels" id="ir-labels"></div> 
+  </div>
+  
+  <div class="ir-actions">
+    <button class="ir-btn primary pulsing" id="ir-spin">Spin Now</button>
+    <button class="ir-btn ghost" id="ir-reset">Try Again</button>
+  </div>
+  
+  <div class="ir-res" id="ir-res" hidden>
+    <div class="ir-picked">
+      <strong>Your coupon is:</strong> <span id="ir-intent">—</span>
+    </div>
+    <a class="ir-cta" id="ir-link" href="#" rel="nofollow">See Coupons →</a>
+    <div class="ir-foot">Results will appear after the ad.</div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const TARGETS = [
+    { label:'10% OFF', url:'https://seujobs.com/cow-long-us-cp/?keyword=10+off+discounts+' },
+    { label:'20% OFF', url:'https://seujobs.com/cow-long-us-cp/?keyword=20+off+discounts+' },
+    { label:'30% OFF', url:'https://seujobs.com/cow-long-us-cp/?keyword=30+off+discounts+' },
+    { label:'40% OFF', url:'https://seujobs.com/cow-long-us-cp/?keyword=40+off+discounts+' },
+    { label:'50% OFF', url:'https://seujobs.com/cow-long-us-cp/?keyword=50+off+discounts+' },
+    { label:'60% OFF', url:'https://seujobs.com/cow-long-us-cp/?keyword=60+off+discounts+' }
+  ];
+  
+  const wheel = document.getElementById('ir-wheel');
+  const labelsBox = document.getElementById('ir-labels');
+  const spin = document.getElementById('ir-spin');
+  const reset = document.getElementById('ir-reset');
+  const res = document.getElementById('ir-res');
+  const picked = document.getElementById('ir-intent');
+  const link = document.getElementById('ir-link');
+  
+  const colors = ['#fecaca','#fde68a','#bbf7d0','#bfdbfe','#ddd6fe','#fbcfe8'];
+  function paintWheel(){
+    const n = TARGETS.length;
+    const step = 360 / n;
+    const parts = [];
+    for(let i=0;i<n;i++){
+      const a0 = i*step, a1 = (i+1)*step;
+      const col = colors[i % colors.length];
+      parts.push(`${col} ${a0}deg ${a1}deg`);
+    }
+    wheel.style.background = `conic-gradient(${parts.join(',')})`;
+    labelsBox.innerHTML = '';
+    const radius = (wheel.clientWidth / 2) - 50;
+    for (let i=0;i<n;i++){
+      const theta = i*step + step/2;
+      const el = document.createElement('div');
+      el.className = 'ir-label';
+      el.style.transform = `translate(-50%,-50%) rotate(${theta}deg) translate(0, -${radius}px) rotate(${-theta}deg)`;
+      el.innerHTML = `<span>${TARGETS[i].label}</span>`;
+      labelsBox.appendChild(el);
+    }
+  }
+  paintWheel();
+  
+  let spinning = false;
+  function pickTarget(){
+    const i = Math.floor(Math.random() * TARGETS.length);
+    return { index:i, ...TARGETS[i] };
+  }
+  
+  function spinWheel(){
+    if(spinning) return;
+    spinning = true;
+    spin.classList.remove('pulsing');
+    
+    const chosen = pickTarget();
+    const sectorAngle = 360 / TARGETS.length;
+    const base = chosen.index * sectorAngle + sectorAngle/2;
+    const rounds = 5 * 360;
+    const target = rounds + (360 - base);
+    
+    wheel.style.transition = 'transform 2.2s cubic-bezier(.2,.7,.1,1)';
+    wheel.style.transform = `rotate(${target}deg)`;
+    
+    setTimeout(()=>{
+      spinning = false;
+      picked.textContent = chosen.label;
+      link.href = chosen.url;
+      res.hidden = false;
+      link.classList.add('pulsing');
+    }, 2300);
+  }
+  
+  function resetWheel(){
+    wheel.style.transition = 'none';
+    wheel.style.transform = 'rotate(0deg)';
+    res.hidden = true;
+    spin.classList.add('pulsing');
+    link.classList.remove('pulsing');
+  }
+  
+  spin.addEventListener('click', spinWheel);
+  reset.addEventListener('click', resetWheel);
+})();
+</script>
+</body>
+</html>
